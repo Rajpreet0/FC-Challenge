@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+
+model Challenge {
+  id String @id @default(cuid())
+  slug String @unique
+  title String
+  description String?
+  startAt DateTime?
+  endAt DateTime?
+  isPublic Boolean @default(false)
+  inviteToken String @unique
+  participants Participant[]
+  createdAt DateTime @default(now())
+}
+
+model Participant {
+  id String @id @default(cuid())
+  challenge Challenge @relation(fields: [challengeId], references: [id])
+  challengeId String
+  nickname String
+  createdAt DateTime @default(now())
+  entries Entry[]
+}
+
+model Entry {
+  id String @id @default(cuid())
+  participant Participant @relation(fields: [participantId], references: [id])
+  participantId String
+  value Float
+  proofUrl String?
+  createdAt DateTime @default(now())
+}
