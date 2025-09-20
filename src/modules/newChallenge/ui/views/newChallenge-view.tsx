@@ -5,6 +5,8 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { useState } from "react";
+import Success from "../components/success";
+import { toast } from "sonner";
 
 type CreateResponse = {
     inviteUrl: string;
@@ -48,6 +50,7 @@ const NewChallengeView = () => {
 
             const data: CreateResponse = await res.json();
             setInviteUrl(data.inviteUrl);
+            toast("Challenge created.");
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -57,11 +60,9 @@ const NewChallengeView = () => {
 
 
  if (inviteUrl) {
-    return (
-        <div>
-            Hallo das ist Success
-        </div>
-    )
+    return <Success
+        challengeTitle={title}
+        challengeLink={inviteUrl}/>
  }
 
   return (
