@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useParticipant } from "@/hooks/useParticipant";
 import { useState } from "react";
 
 interface Challenge {
@@ -15,6 +16,7 @@ interface Challenge {
 
 const ChallengePageView = ({challenge} : {challenge: Challenge}) => {
 
+  const { participant, loading, setParticipant } = useParticipant(challenge.slug);
   const [nickname, setNickname] = useState("");
   const [status, setStatus] = useState("");
 
@@ -34,11 +36,15 @@ const ChallengePageView = ({challenge} : {challenge: Challenge}) => {
       }
 
       const data = await res.json();
+      setParticipant(data.participant);
       setStatus(`Logged In as: ${data.participant.nickname}`);
     } catch (err) {
       setStatus("❌ Unexpected Error");
     }
   };
+
+
+  if (loading) return <p>⏳ Loading...</p>;
 
 
   return (
@@ -47,14 +53,23 @@ const ChallengePageView = ({challenge} : {challenge: Challenge}) => {
         {challenge.startAt && challenge.endAt && (
             <p className="text-center text-lg mt-4  text-blue md:mt-2">Zeitraum: {new Date(challenge.startAt).toLocaleDateString("de-DE")} - {new Date(challenge.endAt).toLocaleDateString("de-DE")}</p>
         )}
-        <div className="flex flex-col items-center justify-center  min-h-[70vh]  mt-2" >
-            <div className="grid w-full  items-center gap-6 md:w-md ">
-                <Label htmlFor="nickname">Nicknamen eingeben</Label>
-                <Input type="text" id="nickname" value={nickname} onChange={(e) => setNickname(e.target.value)}/>
-            </div>
-            <Button variant="login_home" className="text-md font-normal mt-8 px-20 hover:scale-105" onClick={handleJoin}>Join</Button>
-            {status && <p className="mt-4">{status}</p>}
-        </div>
+
+        {!participant ? (
+          <div className="flex flex-col items-center justify-center  min-h-[70vh]  mt-2" >
+              <div className="grid w-full  items-center gap-6 md:w-md ">
+                  <Label htmlFor="nickname">Nicknamen eingeben</Label>
+                  <Input type="text" id="nickname" value={nickname} onChange={(e) => setNickname(e.target.value)}/>
+              </div>
+              <Button variant="login_home" className="text-md font-normal mt-8 px-20 hover:scale-105" onClick={handleJoin}>Join</Button>
+              {status && <p className="mt-4">{status}</p>}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center min-h-[70vh] mt-2">
+            <p className="text-lg">
+              Eingeloggt als <b>{participant.nickname}</b>
+            </p>
+          </div>
+        )}
     </div>
   )
 }
