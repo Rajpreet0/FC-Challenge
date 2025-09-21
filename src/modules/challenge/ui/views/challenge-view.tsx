@@ -1,6 +1,8 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useState } from "react";
 
 interface Challenge {
     slug: string;
@@ -12,6 +14,33 @@ interface Challenge {
 }
 
 const ChallengePageView = ({challenge} : {challenge: Challenge}) => {
+
+  const [nickname, setNickname] = useState("");
+  const [status, setStatus] = useState("");
+
+  const handleJoin = async () => {
+    setStatus("⏳ Wird gesendet...");
+    try {
+      const res = await fetch(`/api/challenges/${challenge.slug}/join`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nickname }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        setStatus("Error: " + error.error);
+        return;
+      }
+
+      const data = await res.json();
+      setStatus(`Logged In as: ${data.participant.nickname}`);
+    } catch (err) {
+      setStatus("❌ Unexpected Error");
+    }
+  };
+
+
   return (
     <div className="p-2">
         <h1 className="text-center text-3xl mt-6 font-bold text-blue md:text-4xl md:mt-0">{challenge.title}</h1>
@@ -21,9 +50,10 @@ const ChallengePageView = ({challenge} : {challenge: Challenge}) => {
         <div className="flex flex-col items-center justify-center  min-h-[70vh]  mt-2" >
             <div className="grid w-full  items-center gap-6 md:w-md ">
                 <Label htmlFor="nickname">Nicknamen eingeben</Label>
-                <Input type="text" id="nickname"/>
+                <Input type="text" id="nickname" value={nickname} onChange={(e) => setNickname(e.target.value)}/>
             </div>
-            <Button variant="login_home" className="text-md font-normal mt-8 px-20 hover:scale-105" >Join</Button>
+            <Button variant="login_home" className="text-md font-normal mt-8 px-20 hover:scale-105" onClick={handleJoin}>Join</Button>
+            {status && <p className="mt-4">{status}</p>}
         </div>
     </div>
   )
