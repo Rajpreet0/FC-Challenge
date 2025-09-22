@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useParticipant } from "@/hooks/useParticipant";
 import { useState } from "react";
+import ChallengeViewLogged from "./challenge-view-logged";
 
 interface Challenge {
     slug: string;
@@ -44,9 +45,6 @@ const ChallengePageView = ({challenge} : {challenge: Challenge}) => {
   };
 
 
-  if (loading) return <p>⏳ Loading...</p>;
-
-
   return (
     <div className="p-2">
         <h1 className="text-center text-3xl mt-6 font-bold text-blue md:text-4xl md:mt-0">{challenge.title}</h1>
@@ -65,9 +63,7 @@ const ChallengePageView = ({challenge} : {challenge: Challenge}) => {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center min-h-[70vh] mt-2">
-            <p className="text-lg">
-              Eingeloggt als <b>{participant.nickname}</b>
-            </p>
+            <ChallengeViewLogged/>
           </div>
         )}
     </div>
