@@ -8,9 +8,10 @@ import { toast } from "sonner";
 interface SuccessProps {
     challengeTitle: string;
     challengeLink: string;
+    slug: string;
 }
 
-const Success: React.FC<SuccessProps> = ({challengeLink, challengeTitle}) => {
+const Success: React.FC<SuccessProps> = ({challengeLink, challengeTitle, slug}) => {
 
     const { Canvas } = useQRCode();
 
@@ -21,6 +22,15 @@ const Success: React.FC<SuccessProps> = ({challengeLink, challengeTitle}) => {
         } catch (e) {
             toast("Copy failed. Please copy manually.")
         }
+    }
+
+    const copySlug = async () => {
+      try {
+        await navigator.clipboard.writeText(slug);
+        toast("Challenge ID Copied");
+      } catch (e) {
+        toast("Copy failed. Please copy manually.")
+      }
     }
 
   return (
@@ -44,7 +54,6 @@ const Success: React.FC<SuccessProps> = ({challengeLink, challengeTitle}) => {
             <div className="flex max-w-lg flex-col gap-3 sm:flex-row">
               <Input
                 type="text"
-                disabled
                 value={challengeLink}
                 readOnly
                 className="w-full"
@@ -53,6 +62,18 @@ const Success: React.FC<SuccessProps> = ({challengeLink, challengeTitle}) => {
                 variant="login_home"
                 className="w-full sm:w-auto rounded-lg"
                 onClick={copyLink}
+              >
+                <Copy className="mr-2 h-4 w-4" /> Copy
+              </Button>
+            </div>
+            <div className="flex max-w-lg flex-col gap-3 items-center  mt-6 sm:flex-row">
+              <div className="bg-white p-2 rounded-md border-2 border-gold">
+                <p className="text-blue">{slug}</p>
+              </div>
+              <Button
+                variant="login_home"
+                className="w-full sm:w-auto rounded-lg"
+                onClick={copySlug}
               >
                 <Copy className="mr-2 h-4 w-4" /> Copy
               </Button>

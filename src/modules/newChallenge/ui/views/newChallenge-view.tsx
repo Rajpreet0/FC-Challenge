@@ -23,6 +23,7 @@ const NewChallengeView = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [inviteUrl, setInviteUrl] = useState<string | null>(null);
+    const [slug, setSlug] = useState<string>("");
 
     // Send API Call
     async function onSubmit(e: React.FormEvent) {
@@ -50,6 +51,7 @@ const NewChallengeView = () => {
 
             const data: CreateResponse = await res.json();
             setInviteUrl(data.inviteUrl);
+            setSlug(data.challenge.slug);
             toast("Challenge created.");
         } catch (err: any) {
             setError(err.message);
@@ -62,7 +64,8 @@ const NewChallengeView = () => {
  if (inviteUrl) {
     return <Success
         challengeTitle={title}
-        challengeLink={inviteUrl}/>
+        challengeLink={inviteUrl}
+        slug={slug}/>
  }
 
   return (
