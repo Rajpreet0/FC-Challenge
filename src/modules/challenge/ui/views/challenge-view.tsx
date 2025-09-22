@@ -63,7 +63,7 @@ const ChallengePageView = ({challenge} : {challenge: Challenge}) => {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center min-h-[70vh] mt-2">
-            <ChallengeViewLogged/>
+            <ChallengeViewLogged participantId={participant.id}/>
           </div>
         )}
     </div>
