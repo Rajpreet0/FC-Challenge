@@ -3,15 +3,18 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { CirclePlay, Funnel, ImagePlay } from "lucide-react"
+import { useDropzone } from "react-dropzone";
 import { useParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
+import { supabase } from "@/lib/supabaseClient"
 
 interface Entry {
     id: string;
     nickname: string;
     value: number;
     createdAt: string;
+    proofUrl?: string;
 }
 
 const ChallengeViewLogged = ({ participantId }: { participantId: string }) => {
@@ -22,6 +25,8 @@ const ChallengeViewLogged = ({ participantId }: { participantId: string }) => {
     const [date, setDate] = useState("");
     const [entries, setEntries] = useState<Entry[]>([]);
     const [loading, setLoading] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const [fileUrl, setFileUrl] = useState<string | null>(null);
 
     // Laden aller Entries
     const loadEntries = async () => {
@@ -42,6 +47,46 @@ const ChallengeViewLogged = ({ participantId }: { participantId: string }) => {
         loadEntries();
     }, []);
 
+
+    const onDrop = useCallback(async(acceptFiles: File[]) => {
+        const file = acceptFiles[0];
+        if (!file) return;
+
+        setUploading(true);
+        setFileUrl(null);
+
+        try {
+            
+            const fileExt = file.name.split(".").pop();
+            const fileName = `${participantId}_${Date.now()}.${fileExt}`;
+            const filePath = `${slug}/${fileName}`;
+
+            const { error } = await supabase.storage
+                .from("challenge-media") // Bucket Name
+                .upload(filePath, file);
+
+            if (error) throw error;
+
+            const { data: publicUrlData } = supabase.storage
+                .from("challenge-media")
+                .getPublicUrl(filePath);
+
+            setFileUrl(publicUrlData.publicUrl);
+            toast("✅ Datei hochgeladen");
+        } catch (err: any) {
+            console.error(err);
+            toast("❌ Upload fehlgeschlagen");
+        } finally {
+            setUploading(false);
+        }
+    }, [participantId, slug]);
+
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+        accept: {"image/*": [], "video/*": []},
+        multiple: false,
+        onDrop,
+    });
+
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -53,6 +98,7 @@ const ChallengeViewLogged = ({ participantId }: { participantId: string }) => {
                     participantId,
                     value,
                     date: date || undefined,
+                    proofUrl: fileUrl || undefined,
                 }),
             });
 
@@ -64,6 +110,7 @@ const ChallengeViewLogged = ({ participantId }: { participantId: string }) => {
             toast("Entry gespeichert");
             setValue("");
             setDate("");
+            setFileUrl(null);
             await loadEntries();
         } catch (err: any) {
             toast(err.message);
@@ -82,11 +129,22 @@ const ChallengeViewLogged = ({ participantId }: { participantId: string }) => {
             <Label htmlFor="date">Date</Label>
             <Input type="date" id="date" value={date} onChange={(e) => setDate(e.target.value)}/>
 
-            <div className="p-2 border-2 border-gold rounded-md border-dashed h-[20vh] cursor-pointer">
-                <div className="flex flex-col w-full h-full items-center justify-center text-gold">
-                    <p className="text-md">Video/Foto einfügen</p>
-                    <ImagePlay className="mt-5 w-[40px]  h-[40px]"/>
-                </div>
+            {/* Drap & Drop Zone */}
+            <div {...getRootProps()} 
+                className={`p-2 border-2 border-dashed rounded-md h-[20vh] cursor-pointer flex items-center justify-center ${isDragActive ? "border-blue bg-blue-50" : "border-gold"}`}>
+                    <input {...getInputProps()} />
+                    {uploading && (
+                        <p className="text-gold">⏳ Uploading...</p>
+                    )} 
+                    {!uploading && fileUrl && (
+                        <p className="text-green-600">✅ Datei hochgeladen</p>
+                    )}
+                    {!uploading && !fileUrl && (
+                        <div className="flex flex-col items-center text-gold">
+                            <p className="text-md">Video/Foto einfügen</p>
+                            <ImagePlay className="mt-5 w-[40px] h-[40px]" />
+                        </div>
+                    )}
             </div>
 
             <Button variant="login_home" className="text-md font-normal mt-8 px-20 hover:scale-105" type="submit" disabled={loading}>{loading ? "Saving..." : "Save"}</Button>
@@ -116,6 +174,19 @@ const ChallengeViewLogged = ({ participantId }: { participantId: string }) => {
                         <TableCell>{entry.value}</TableCell>
                         <TableCell>
                             {new Date(entry.createdAt).toLocaleDateString("de-DE")}
+                        </TableCell>
+                        <TableCell>
+                            {entry.proofUrl ? (
+                                <a
+                                    href={entry.proofUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-gold underline">
+                                    Media
+                                </a>
+                            ) : (
+                                "-"
+                            )}
                         </TableCell>
                     </TableRow>
                 ))}

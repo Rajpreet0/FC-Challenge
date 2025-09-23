@@ -29,6 +29,7 @@ export async function GET(req: Request, { params }: Params) {
             nickname: p.nickname,
             value: e.value,
             createdAt: e.createdAt,
+            proofUrl: e.proofUrl,
         }))
     );
  
@@ -38,7 +39,7 @@ export async function GET(req: Request, { params }: Params) {
 export async function POST(req: Request, { params }: Params) {
     try {
         const { slug } = params;
-        const { participantId, value, date } = await req.json();
+        const { participantId, value, date, proofUrl } = await req.json();
 
         if (!value) {
             return NextResponse.json({ error: "Value required" }, { status: 400 })
@@ -57,6 +58,7 @@ export async function POST(req: Request, { params }: Params) {
                 participantId,
                 value: Number(value),
                 createdAt: date ? new Date(date) : new Date(),
+                proofUrl: proofUrl || null,
             },
         });
 
