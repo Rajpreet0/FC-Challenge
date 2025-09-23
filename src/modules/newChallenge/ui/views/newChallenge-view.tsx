@@ -53,8 +53,9 @@ const NewChallengeView = () => {
             setInviteUrl(data.inviteUrl);
             setSlug(data.challenge.slug);
             toast("Challenge created.");
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) {
+            console.log(err);
+            setError("Fehler beim erstellen der Challenge");
         } finally {
             setLoading(false);
         }

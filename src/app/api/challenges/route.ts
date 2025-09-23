@@ -50,10 +50,10 @@ export async function POST(req: Request) {
         const inviteUrl = body.isPublic ? `${base}/c/${slug}` : `${base}/c/${slug}?t=${inviteToken}`;
 
         return NextResponse.json({ challenge, inviteUrl});
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error(err);
         return NextResponse.json(
-            { error: err?.message ?? "Invalid payload" },
+            { error: err ?? "Invalid payload" },
             { status: 400 }
         )
     }

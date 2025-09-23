@@ -19,7 +19,8 @@ const Success: React.FC<SuccessProps> = ({challengeLink, challengeTitle, slug}) 
         try {
             await navigator.clipboard.writeText(challengeLink);
             toast("Link copied to clipboard");
-        } catch (e) {
+        } catch (err) {
+            console.log(err);
             toast("Copy failed. Please copy manually.")
         }
     }
@@ -28,7 +29,8 @@ const Success: React.FC<SuccessProps> = ({challengeLink, challengeTitle, slug}) 
       try {
         await navigator.clipboard.writeText(slug);
         toast("Challenge ID Copied");
-      } catch (e) {
+      } catch (err) {
+        console.log(err);
         toast("Copy failed. Please copy manually.")
       }
     }

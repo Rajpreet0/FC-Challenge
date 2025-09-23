@@ -8,6 +8,7 @@ import { useParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
 import { supabase } from "@/lib/supabaseClient"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 interface Entry {
     id: string;
@@ -27,6 +28,7 @@ const ChallengeViewLogged = ({ participantId }: { participantId: string }) => {
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [fileUrl, setFileUrl] = useState<string | null>(null);
+    const [filterDate, setFilterDate] = useState("");
 
     // Laden aller Entries
     const loadEntries = async () => {
@@ -73,7 +75,7 @@ const ChallengeViewLogged = ({ participantId }: { participantId: string }) => {
 
             setFileUrl(publicUrlData.publicUrl);
             toast("✅ Datei hochgeladen");
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error(err);
             toast("❌ Upload fehlgeschlagen");
         } finally {
@@ -112,8 +114,9 @@ const ChallengeViewLogged = ({ participantId }: { participantId: string }) => {
             setDate("");
             setFileUrl(null);
             await loadEntries();
-        } catch (err: any) {
-            toast(err.message);
+        } catch (err) {
+            console.log(err);
+            toast("Error when saving to Entry");
         } finally {
             setLoading(false);
         }
@@ -153,7 +156,22 @@ const ChallengeViewLogged = ({ participantId }: { participantId: string }) => {
 
         <div className="w-full flex items-center justify-between mt-[10vh]">
             <h1 className="font-bold text-blue text-2xl">Leaderboard</h1>
-            <Funnel className="text-blue"/>
+            <Popover>
+                <PopoverTrigger asChild><Funnel className="text-blue cursor-pointer"/></PopoverTrigger>
+                <PopoverContent className="w-56">
+                   <div className="flex flex-col space-y-2 p-4">
+                        <Label className="text-sm text-blue" htmlFor="filterDate">
+                            Filter by Date
+                        </Label>
+                        <Input
+                            id="filterDate"
+                            type="date"
+                            value={filterDate}
+                            onChange={(e) => setFilterDate(e.target.value)}
+                        />
+                   </div>
+                </PopoverContent>
+            </Popover>
         </div>
 
         <Table className="mt-[50px]">
@@ -167,7 +185,11 @@ const ChallengeViewLogged = ({ participantId }: { participantId: string }) => {
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {entries.map((entry, i) => (
+                {entries.filter((entry) => {
+                    if (!filterDate) return true;
+                    const entryDate = new Date(entry.createdAt).toISOString().split("T")[0];
+                    return entryDate === filterDate;
+                }).map((entry, i) => (
                     <TableRow key={entry.id}>
                         <TableCell className="font-medium">{i + 1}</TableCell>
                         <TableCell>{entry.nickname}</TableCell>
@@ -182,7 +204,7 @@ const ChallengeViewLogged = ({ participantId }: { participantId: string }) => {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-gold underline">
-                                    Media
+                                    <CirclePlay/>
                                 </a>
                             ) : (
                                 "-"

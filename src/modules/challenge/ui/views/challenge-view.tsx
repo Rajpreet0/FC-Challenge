@@ -17,7 +17,7 @@ interface Challenge {
 
 const ChallengePageView = ({challenge} : {challenge: Challenge}) => {
 
-  const { participant, loading, setParticipant } = useParticipant(challenge.slug);
+  const { participant, setParticipant } = useParticipant(challenge.slug);
   const [nickname, setNickname] = useState("");
   const [status, setStatus] = useState("");
 
@@ -40,6 +40,7 @@ const ChallengePageView = ({challenge} : {challenge: Challenge}) => {
       setParticipant(data.participant);
       setStatus(`Logged In as: ${data.participant.nickname}`);
     } catch (err) {
+      console.log(err);
       setStatus("❌ Unexpected Error");
     }
   };

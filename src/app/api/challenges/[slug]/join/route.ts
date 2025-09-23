@@ -53,7 +53,7 @@ export async function POST(
     });
 
     return NextResponse.json({ participant });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err);
     return NextResponse.json({ error: "Fehler beim Joinen" }, { status: 500 });
   }
