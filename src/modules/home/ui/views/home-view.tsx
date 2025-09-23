@@ -5,13 +5,38 @@ import { LogIn, PlusIcon } from "lucide-react";
 import Image from "next/image";
 import Logo from "../../../../../public/fc_logo.png";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+
+interface Challenge {
+  slug: string;
+  title: string;
+  description?: string;
+  startAt?: string | null;
+  endAt?: string | null;
+}
 
 const HomeView = () => {
 
     const router = useRouter();
     const [value, setValue] = useState("");
     const [status, setStatus] = useState("");
+
+    const [challenges, setChallenges] = useState<Challenge[]>([]);
+ 
+    useEffect(() => {
+      const load = async () => {
+        try {
+          const res = await fetch("/api/challenges");
+          const data = await res.json();
+          setChallenges(data.challenges || []);
+        } catch (err) {
+          console.log(err);
+        } 
+      }
+
+      load();
+    }, []);
 
     const handleJoin = async () => {
       if (!value.trim()) return;
@@ -89,6 +114,35 @@ const HomeView = () => {
                <PlusIcon size={80}/>   Start Challenge 
             </Button>
         </div>
+
+        <div className="mt-8">
+          <h2 className="text-xl font-bold text-blue mb-4">Öffentliche Challenges</h2>
+          {challenges.length === 0 && <p>Keine öffentlichen Challenges vorhanden.</p>}
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {challenges.map((c) => (
+              <Link
+                key={c.slug}
+                href={`/c/${c.slug}`}
+                className="block p-6 rounded-2xl border border-gold bg-white shadow-md hover:shadow-lg transition-transform hover:scale-105"
+              >
+                <h3 className="text-lg font-semibold text-blue mb-2">{c.title}</h3>
+                {c.description && (
+                  <p className="text-sm text-gray-600 line-clamp-3">{c.description}</p>
+                )}
+                {(c.startAt || c.endAt) && (
+                  <p className="mt-3 text-xs text-gray-500">
+                    {c.startAt &&
+                      `Start: ${new Date(c.startAt).toLocaleDateString("de-DE")}`}{" "}
+                    {c.endAt &&
+                      `– Ende: ${new Date(c.endAt).toLocaleDateString("de-DE")}`}
+                  </p>
+                )}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+
     </div>
   )
 }
