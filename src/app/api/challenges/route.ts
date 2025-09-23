@@ -58,3 +58,34 @@ export async function POST(req: Request) {
         )
     }
 }
+
+
+// Get All Challenges
+export async function GET(){
+    try {
+        const challenges = await prisma.challenge.findMany({
+            where: {
+                isPublic: true,
+            },
+            select: {
+                slug: true,
+                title: true,
+                description: true,
+                startAt: true,
+                endAt: true,
+                createdAt: true,
+            },
+            orderBy: {
+                createdAt: 'desc'
+            },
+        });
+
+        return NextResponse.json({ challenges });
+    } catch (err) {
+        console.log(err);
+        return NextResponse.json(
+            { error: "Invalid payload" },
+            { status: 500 }
+        )
+    }
+}
