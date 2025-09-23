@@ -44,7 +44,7 @@ export async function POST(req: Request) {
             }
         });
 
-        const base = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+        const base = process.env.NEXT_PUBLIC_APP_URL ?? "https://fc-challenge.vercel.app/";
 
         // Build the InviteURL depending on rather it is Public or not
         const inviteUrl = body.isPublic ? `${base}/c/${slug}` : `${base}/c/${slug}?t=${inviteToken}`;
