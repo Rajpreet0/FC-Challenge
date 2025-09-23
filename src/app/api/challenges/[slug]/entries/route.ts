@@ -2,12 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
 
-interface Params {
-    params: { slug: string }
-}
 
-
-export async function GET(req: Request, { params }: Params) {
+export async function GET(req: Request, { params }: { params: { slug: string } }) {
     const  slug  = params.slug;
 
     const challenge = await prisma.challenge.findUnique({
@@ -36,7 +32,7 @@ export async function GET(req: Request, { params }: Params) {
     return NextResponse.json({ entries });
 }
 
-export async function POST(req: Request, { params }: Params) {
+export async function POST(req: Request, { params }: { params: { slug: string }}) {
     try {
         const { slug } = params;
         const { participantId, value, date, proofUrl } = await req.json();
