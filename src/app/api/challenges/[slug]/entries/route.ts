@@ -3,8 +3,8 @@ import { NextResponse } from "next/server";
 
 
 
-export async function GET(req: Request, { params }: { params: { slug: string } }) {
-    const  slug  = params.slug;
+export async function GET(req: Request, { params }: { params: Promise<{ slug: string }>}) {
+    const  { slug }  = await params;
 
     const challenge = await prisma.challenge.findUnique({
         where: { slug },
@@ -32,9 +32,9 @@ export async function GET(req: Request, { params }: { params: { slug: string } }
     return NextResponse.json({ entries });
 }
 
-export async function POST(req: Request, { params }: { params: { slug: string }}) {
+export async function POST(req: Request, { params }: { params: Promise<{ slug: string }>}) {
     try {
-        const { slug } = params;
+        const { slug } = await params;
         const { participantId, value, date, proofUrl } = await req.json();
 
         if (!value) {

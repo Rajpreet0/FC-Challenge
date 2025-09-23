@@ -4,8 +4,11 @@ import { NextResponse } from "next/server";
 
 export async function POST(
   req: Request,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
+
+   const { slug } = await params;
+
   try {
     const { nickname } = await req.json();
 
@@ -18,7 +21,7 @@ export async function POST(
 
     // Challenge finden
     const challenge = await prisma.challenge.findUnique({
-      where: { slug: params.slug },
+      where: { slug: slug },
     });
 
     if (!challenge) {
