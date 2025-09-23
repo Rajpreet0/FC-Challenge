@@ -18,9 +18,9 @@ export async function GET(req: Request, { params }: Params) {
         }
 
         return NextResponse.json(challenge);
-    } catch (err: any) {
+    } catch (err: unknown) {
         return NextResponse.json(
-            { error: err?.message ?? "Server error"},
+            { error: err ?? "Server error"},
             { status: 500 }
         )
     }
